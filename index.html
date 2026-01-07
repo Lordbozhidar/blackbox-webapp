@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackBox VPN</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: #050505;
+            --card-bg: #141414;
+            --text-main: #ffffff;
+            --text-gold: #FFD700;
+            --accent-purple: #8A2BE2;
+            --accent-green: #39FF14;
+            --btn-gradient: linear-gradient(90deg, #FFD700 0%, #FFA500 100%);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            padding-bottom: 50px;
+        }
+
+        h1, h2, h3 { margin: 0; }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .brand {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(45deg, #FFD700, #FFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+
+        .lang-switch {
+            background: #222;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #888;
+        }
+        .lang-switch span.active { color: var(--text-gold); font-weight: bold; }
+
+        .section-title {
+            text-align: center;
+            font-size: 20px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #888;
+        }
+
+        /* Карточки тарифов */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid #333;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            transition: transform 0.2s;
+        }
+        
+        .card:active { transform: scale(0.98); }
+
+        .card.featured {
+            border: 1px solid var(--text-gold);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .plan-name { font-size: 18px; font-weight: bold; }
+        .plan-price { font-size: 22px; font-weight: 800; color: var(--text-gold); }
+        .old-price { font-size: 14px; text-decoration: line-through; color: #555; margin-right: 5px; }
+
+        .features {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 20px 0;
+            font-size: 13px;
+            color: #ccc;
+        }
+        .features li { margin-bottom: 5px; display: flex; align-items: center; }
+        .features li::before {
+            content: "✓";
+            color: var(--accent-green);
+            margin-right: 8px;
+            font-weight: bold;
+        }
+
+        /* Выбор периода */
+        .period-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .p-btn {
+            background: #222;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+            position: relative;
+        }
+        
+        .p-btn.active {
+            background: #333;
+            border-color: var(--text-gold);
+            color: var(--text-gold);
+        }
+
+        .badge-discount {
+            position: absolute;
+            top: -8px;
+            right: -5px;
+            background: var(--accent-purple);
+            color: white;
+            font-size: 9px;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .badge-best {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(90deg, #FFD700, #FFA500);
+            color: black;
+            font-size: 10px;
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        /* Основная кнопка */
+        .btn-buy {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: var(--btn-gradient);
+            color: #000;
+            font-weight: 800;
+            font-size: 16px;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        .footer-ref {
+            margin-top: 40px;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+            border-radius: 16px;
+            border-left: 3px solid var(--accent-purple);
+        }
+        .footer-ref h4 { color: var(--accent-purple); margin: 0 0 10px 0; }
+        .footer-ref p { font-size: 12px; color: #888; margin: 0; }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="brand">⚡ BLACKBOX</div>
+        <div class="lang-switch">
+            <span class="active">RU</span> / <span>EN</span>
+        </div>
+    </div>
+
+    <div class="section-title">Планы</div>
+
+    <!-- TRIAL -->
+    <div class="card" onclick="selectTrial()">
+        <div class="card-header">
+            <span class="plan-name">Пробный старт</span>
+            <span class="plan-price">0 ₽</span>
+        </div>
+        <ul class="features">
+            <li>Доступ ко всем локациям</li>
+            <li>2 дня бесплатно</li>
+            <li>Без привязки карты</li>
+        </ul>
+        <button class="btn-buy">Получить</button>
+    </div>
+
+    <!-- SOLO -->
+    <div class="card" id="card-solo">
+        <div class="card-header">
+            <div>
+                <div class="plan-name">Соло</div>
+                <div style="font-size: 12px; color: #888;">2 ключа (4 устройства)</div>
+            </div>
+            <div class="plan-price" id="price-solo">299 ₽</div>
+        </div>
+        
+        <div class="period-selector">
+            <div class="p-btn active" onclick="setPeriod('solo', 1, 299, this)">1 Месяц</div>
+            <div class="p-btn" onclick="setPeriod('solo', 3, 852, this)">
+                3 Месяца <span class="badge-discount">-5%</span>
+            </div>
+            <div class="p-btn" onclick="setPeriod('solo', 6, 1614, this)">
+                Полгода <span class="badge-discount">-10%</span>
+            </div>
+            <div class="p-btn" onclick="setPeriod('solo', 12, 3049, this)">
+                1 Год <span class="badge-discount">-15%</span>
+            </div>
+        </div>
+
+        <button class="btn-buy" onclick="buy('solo')">Купить Соло</button>
+    </div>
+
+    <!-- FAMILY -->
+    <div class="card featured" id="card-family">
+        <span class="badge-best">Лучший выбор в РФ</span>
+        <div class="card-header">
+            <div>
+                <div class="plan-name">Дружная Семья</div>
+                <div style="font-size: 12px; color: #888;">2 ключа (8 устройств)</div>
+            </div>
+            <div class="plan-price" id="price-family">499 ₽</div>
+        </div>
+        
+        <div class="period-selector">
+            <div class="p-btn active" onclick="setPeriod('family', 1, 499, this)">1 Месяц</div>
+            <div class="p-btn" onclick="setPeriod('family', 3, 1422, this)">
+                3 Месяца <span class="badge-discount">-5%</span>
+            </div>
+            <div class="p-btn" onclick="setPeriod('family', 6, 2694, this)">
+                Полгода <span class="badge-discount">-10%</span>
+            </div>
+            <div class="p-btn" onclick="setPeriod('family', 12, 5089, this)">
+                1 Год <span class="badge-discount">-15%</span>
+            </div>
+        </div>
+
+        <button class="btn-buy" onclick="buy('family')">Купить Семью</button>
+    </div>
+
+    <!-- REFERRAL INFO -->
+    <div class="footer-ref">
+        <h4>Партнерская программа</h4>
+        <p>Приглашай друзей и получай 50₽ за каждого на оплату своего тарифа. Для блогеров — спец условия (USDT).</p>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // На весь экран
+
+        // Данные текущего выбора
+        let selections = {
+            solo: { months: 1, price: 299 },
+            family: { months: 1, price: 499 }
+        };
+
+        function setPeriod(plan, months, price, element) {
+            // Обновляем данные
+            selections[plan] = { months: months, price: price };
+            
+            // Визуально обновляем цену
+            document.getElementById(`price-${plan}`).innerText = price + " ₽";
+
+            // Переключаем активную кнопку
+            let parent = element.parentElement;
+            let buttons = parent.getElementsByClassName('p-btn');
+            for(let btn of buttons) {
+                btn.classList.remove('active');
+            }
+            element.classList.add('active');
+
+            // Вибрация для тактильности
+            if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+        }
+
+        function buy(plan) {
+            const data = {
+                action: "buy",
+                plan: plan,
+                months: selections[plan].months,
+                price: selections[plan].price
+            };
+            tg.sendData(JSON.stringify(data)); // Отправляем боту
+        }
+
+        function selectTrial() {
+            const data = {
+                action: "trial",
+                price: 0
+            };
+            tg.sendData(JSON.stringify(data));
+        }
+
+        // Настройка цветов темы Телеграм
+        document.body.style.backgroundColor = "var(--bg-color)";
+    </script>
+</body>
+</html>
